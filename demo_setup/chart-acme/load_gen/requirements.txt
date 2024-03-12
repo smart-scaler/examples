@@ -6,7 +6,7 @@ cffi==1.16.0
 charset-normalizer==3.3.2
 click==8.1.7
 ConfigArgParse==1.7
-cryptography==41.0.5
+cryptography==42.0.4
 Django==4.2.7
 django-rest-framework==0.1.0
 djangorestframework==3.14.0
