@@ -1,0 +1,1 @@
+python -m locust --headless -f heartbeat.py --host=${HOSTNAME}

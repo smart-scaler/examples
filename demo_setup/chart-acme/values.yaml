@@ -1,0 +1,165 @@
+# Default values for avesha-cluster.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+copies: 1
+
+create_default: false
+is_remote: true
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+namespace:
+  - config:
+      name: acmefitness-demo-1
+#  - config:
+#      name: acmefitness-helm-2
+#  - config:
+#      name: acmefitness-3
+#  - config:
+#      name: acmefitness-4
+#  - config:
+#      name: acmefitness-5
+#  - config:
+#      name: acmefitness-6
+#  - config:
+#      name: acmefitness-7
+#  - config:
+#      name: acmefitness-8
+#  - config:
+#      name: acmefitness-9
+#  - config:
+#      name: acmefitness-10
+
+deployments:
+  - config:
+      name: cart
+      image: gcr.io/vmwarecloudadvocacy/acmeshop-cart:latest
+  - config:
+      name: cart-redis
+      image: bitnami/redis
+  - config:
+      name: catalog
+      image: gcr.io/vmwarecloudadvocacy/acmeshop-catalog:latest
+  - config:
+      name: catalog-mongo
+      image: mongo:4
+  - config:
+      name: frontend
+      image: gcr.io/vmwarecloudadvocacy/acmeshop-front-end:latest
+  - config:
+      name: order
+      image: gcr.io/vmwarecloudadvocacy/acmeshop-order:latest
+  - config:
+      name: order-postgres
+      image: postgres:9.5
+  - config:
+      name: payment
+      image: gcr.io/vmwarecloudadvocacy/acmeshop-payment:latest
+  - config:
+      name: users
+      image: gcr.io/vmwarecloudadvocacy/acmeshop-user:latest
+  - config:
+      name: users-mongo
+      image: mongo:4
+  - config:
+      name: users-redis
+      image: bitnami/redis
+
+provision:
+  - all
+
+create_namespace: false
