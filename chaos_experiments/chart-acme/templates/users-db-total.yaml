@@ -1,0 +1,132 @@
+{{- if or (has "all" $.Values.provision) (has "users-db-total" $.Values.provision)}}
+{{- range $namespace := $.Values.namespace }}
+  {{- range $copy := untilStep 0 ($.Values.copies | int) 1 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-mongo-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+  labels:
+    app: acmefit
+    service: users-mongo-{{$copy}}
+spec:
+  ports:
+    - port: 27017
+      name: mongo-users
+      protocol: TCP
+  selector:
+    app: acmefit
+    service: users-mongo-{{$copy}}
+---
+{{- if $.Values.stateful}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: users-mongodata
+  namespace: {{ $namespace.config.name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+{{- end }}
+---
+apiVersion: apps/v1
+{{- if $.Values.stateful}}
+kind: StatefulSet
+  {{- else }}
+kind: Deployment
+  {{- end }}
+metadata:
+  name: users-mongo-{{ $namespace.config.name }}-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+  labels:
+    app: acmefit
+    service: users-mongo-{{$copy}}
+spec:
+  {{- if $.Values.stateful}}
+  serviceName: users-mongo-{{$copy}}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: acmefit  # has to match .spec.template.metadata.labels
+      service: users-mongo-{{$copy}}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: acmefit  # has to match .spec.selector.matchLabels
+        service: users-mongo-{{$copy}}
+    spec:
+      containers:
+        - name: users-mongo
+          image: mongo:4
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "250Mi"
+          ports:
+            - name: users-mongo
+              containerPort: 27017
+              protocol: "TCP"
+          env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            value: 'mongoadmin'
+          - name: MONGO_INITDB_DATABASE
+            value: 'acmefit'
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: users-mongo-pass
+                key: password
+          volumeMounts:
+            - mountPath: /data/db
+              name: users-mongodata
+            - mountPath: /docker-entrypoint-initdb.d
+              name: mongo-initdb
+      volumes:
+        {{- if $.Values.stateful}}
+        - name: users-mongodata
+          persistentVolumeClaim:
+            claimName: users-mongodata
+        {{- else }}
+        - name: users-mongodata
+          emptyDir: {}
+        {{- end }}
+        - name: mongo-initdb
+          configMap:
+            name: users-initdb-config-{{$copy}}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: users-mongo-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: users-mongo-{{ $namespace.config.name }}-{{$copy}}
+  minReplicas: 1
+  maxReplicas: 50
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 85
+---
+{{- end }}
+{{- end }}
+{{- end }}

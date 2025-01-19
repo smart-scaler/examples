@@ -1,0 +1,117 @@
+{{- if or (has "all" $.Values.provision) (has "catalog-total" $.Values.provision)}}
+{{- range $namespace := $.Values.namespace }}
+  {{- range $copy := untilStep 0 ($.Values.copies | int) 1 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+  labels:
+    app: acmefit
+    service: catalog-{{$copy}}
+spec:
+  ports:
+    - name: http-catalog
+      protocol: TCP
+      port: 8082
+  selector:
+    app: acmefit
+    service: catalog-{{$copy}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-{{ $namespace.config.name }}-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+  labels:
+    app: acmefit
+    service: catalog-{{$copy}}
+spec:
+  selector:
+    matchLabels:
+      app: acmefit
+      service: catalog-{{$copy}}
+  strategy:
+    type: Recreate
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: acmefit
+        service: catalog-{{$copy}}
+    spec:
+      volumes:
+      - name: acmefit-catalog-data
+        emptyDir: {}
+      containers:
+      - image: gcr.io/vmwarecloudadvocacy/acmeshop-catalog:latest
+        imagePullPolicy: "Always"
+        name: catalog
+        env:
+        - name: CATALOG_DB_HOST
+          value: catalog-mongo-{{$copy}}
+        - name: CATALOG_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: catalog-mongo-pass
+              key: password
+        - name: CATALOG_DB_PORT
+          value: '27017'
+        - name: CATALOG_DB_USERNAME
+          value: 'mongoadmin'
+        - name: CATALOG_PORT
+          value: '8082'
+        - name: CATALOG_VERSION
+          value: 'v1'
+        - name: USERS_HOST
+          value: users-{{$copy}}
+        - name: USERS_PORT
+          value: '8083'
+        - name: JAEGER_AGENT_HOST
+          value: 'localhost'
+        - name: JAEGER_AGENT_PORT
+          value: '6831'
+        ports:
+        - containerPort: 8082
+          name: catalog
+        volumeMounts:
+        - mountPath: "/data"
+          name: "acmefit-catalog-data"
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: catalog-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: catalog-{{ $namespace.config.name }}-{{$copy}}
+  minReplicas: 1
+  maxReplicas: 50
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 85
+---
+{{- end }}
+{{- end }}
+{{- end }}

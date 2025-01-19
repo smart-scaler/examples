@@ -1,0 +1,42 @@
+{{- range $namespace := $.Values.namespace }}
+{{- range $copy := untilStep 0 ($.Values.copies | int) 1 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartscaler-load-gen-{{ $namespace.config.name }}-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+  labels:
+    app: acmefit
+    service: smartscaler-load-gen-{{$copy}}
+spec:
+  selector:
+    matchLabels:
+      app: acmefit
+      service: smartscaler-load-gen-{{$copy}}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: acmefit
+        service: smartscaler-load-gen-{{$copy}}
+    spec:
+      containers:
+        - image: aveshatest/smartscaler-load-gen:latest
+          imagePullPolicy: "Always"
+          name: smartscaler-load-gen
+          env:
+            - name: HOSTNAME
+              value: http://frontend-{{$copy}}:80
+            - name: FILENAME
+              value: sinusoidal.py
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1024Mi"
+              cpu: "1000m"
+---
+{{- end }}
+{{- end }}

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "avesha-cluster.fullname" . }}-test-connection"
+  labels:
+    {{- include "avesha-cluster.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "avesha-cluster.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
