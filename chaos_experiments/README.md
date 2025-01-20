@@ -66,3 +66,5 @@ helm install chaos-mesh chaos-mesh/chaos-mesh -n=chaos-mesh --set chaosDaemon.ru
 
 # introduce-chaos-with-httpchaos-configuration
 kubectl apply experiments/503.yaml
+
+# Alternative : Introduce chaos through the chaos-mesh ui
