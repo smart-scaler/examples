@@ -1,0 +1,112 @@
+{{- if or (has "all" $.Values.provision) (has "frontend-total" $.Values.provision)}}
+{{- range $namespace := $.Values.namespace }}
+  {{- range $copy := untilStep 0 ($.Values.copies | int) 1 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+  labels:
+    app: acmefit
+    service: frontend-{{$copy}}
+spec:
+  ports:
+    - name: http-frontend
+      protocol: TCP
+      port: 80
+      targetPort: 3000
+#      nodePort: 30430
+  selector:
+    app: acmefit
+    service: frontend-{{$copy}}
+  type: ClusterIP
+---
+apiVersion: apps/v1 # for versions before 1.8.0 use apps/v1beta1
+kind: Deployment
+metadata:
+  name: frontend-{{ $namespace.config.name }}-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+  labels:
+    app: acmefit
+    service: frontend-{{$copy}}
+spec:
+  selector:
+    matchLabels:
+      app: acmefit
+      service: frontend-{{$copy}}
+  strategy:
+    type: Recreate
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: acmefit
+        service: frontend-{{$copy}}
+    spec:
+      containers:
+      - image: gcr.io/vmwarecloudadvocacy/acmeshop-front-end:latest
+        name: frontend
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        env:
+        - name: FRONTEND_PORT
+          value: '3000'
+        - name: USERS_HOST
+          value: users-{{$copy}}
+        - name: CATALOG_HOST
+          value: catalog-{{$copy}}
+        - name: ORDER_HOST
+          value: order-{{$copy}}
+        - name: CART_HOST
+          value: cart-{{$copy}}
+        - name: USERS_PORT
+          value: '8083'
+        - name: CATALOG_PORT
+          value: '8082'
+        - name: CART_PORT
+          value: '5000'
+        - name: ORDER_PORT
+          value: '6000'
+        - name: JAEGER_AGENT_HOST
+          value: 'localhost'
+        - name: JAEGER_AGENT_PORT
+          value: '6832'
+        ports:
+        - containerPort: 3000
+          name: frontend
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend-{{ $namespace.config.name }}-{{$copy}}
+  minReplicas: 1
+  maxReplicas: 50
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 85
+---
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,72 @@
+{{- if or (has "all" $.Values.provision) (has "cart" $.Values.provision)}}
+{{- range $namespace := $.Values.namespace }}
+{{- range $copy := untilStep 0 ($.Values.copies | int) 1 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-redis-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+  labels:
+    app: acmefit
+    service: users-redis-{{$copy}}
+spec:
+  ports:
+    - port: 6379
+      name: redis-users
+  selector:
+    app: acmefit
+    service: users-redis-{{$copy}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-redis-{{ $namespace.config.name }}-{{$copy}}
+  namespace: {{ $namespace.config.name }}
+  labels:
+    app: acmefit
+    service: users-redis-{{$copy}}
+spec:
+  selector:
+    matchLabels:
+      app: acmefit  # has to match .spec.template.metadata.labels
+      service: users-redis-{{$copy}}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: acmefit  # has to match .spec.selector.matchLabels
+        service: users-redis-{{$copy}}
+    spec:
+      containers:
+        - name: users-redis
+          image: bitnami/redis
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "200Mi"
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: "TCP"
+          env:
+          - name: REDIS_HOST
+            value: users-redis-{{$copy}}
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: users-redis-pass
+                key: password
+          volumeMounts:
+            - mountPath: /var/lib/redis
+              name: users-redis-data
+#            - mountPath: /etc/redis
+#              name: redis-config
+      volumes:
+        - name: users-redis-data
+          emptyDir: {}
+---
+{{- end }}
+{{- end }}
+{{- end }}

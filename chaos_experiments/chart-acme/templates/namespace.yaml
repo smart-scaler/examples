@@ -1,0 +1,13 @@
+{{- if  $.Values.create_namespace}}
+{{- range $.Values.namespace }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{.config.name}}
+  labels:
+    name: development
+    istio-injection: enabled
+---
+{{- end }}
+{{- end }}

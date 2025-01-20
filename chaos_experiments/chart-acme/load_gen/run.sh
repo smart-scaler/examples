@@ -1,0 +1,1 @@
+python -m locust --headless -f ${FILENAME} --host=${HOSTNAME}
