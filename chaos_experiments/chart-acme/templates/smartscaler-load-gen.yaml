@@ -29,7 +29,7 @@ spec:
             - name: HOSTNAME
               value: http://frontend-{{$copy}}:80
             - name: FILENAME
-              value: sinusoidal.py
+              value: constant_load_with_retries.py
           resources:
             requests:
               memory: "512Mi"
