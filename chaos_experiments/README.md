@@ -30,10 +30,10 @@ Before proceeding, ensure you have the following tools installed and configured:
 
 If you don't have Helm installed, follow these steps:
 
-# Download the latest Helm release
+### Download the latest Helm release
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
-# Verify installation
+### Verify installation
 helm version
 
 # install--smart-scaler-agent
@@ -42,9 +42,9 @@ Sign up for an account at AWS Marketplace -  https://aws.amazon.com/marketplace/
 Deploy the Smart Scaler agent on your cluster by following hte instructions at https://ui.saas1.smart-scaler.io/agents page
 
 
-Install Acme Fitness on the Cluster
+# Install Acme Fitness on the Cluster
 
-# Deploy the Acme Fitness application using Helm with the following command:
+### Deploy the Acme Fitness application using Helm with the following command:
 
 ```bash
 helm install acme \
