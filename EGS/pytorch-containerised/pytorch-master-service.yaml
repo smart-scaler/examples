@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pytorch-master-service
+spec:
+  selector:
+    job-name: pytorch-master
+  ports:
+    - protocol: TCP
+      port: 12345
+      targetPort: 12345

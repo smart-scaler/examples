@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pytorch-worker
+spec:
+  parallelism: 3 # Number of workers (excluding master)
+  template:
+    spec:
+      containers:
+        - name: pytorch-worker
+          image: dockinator24/distributed-pytorch-trainer:latest
+          resources:
+            limits:
+              nvidia.com/gpu: 1 # Request 1 GPU per worker
+          env:
+            - name: RANK
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['batch.kubernetes.io/job-completion-index']
+            - name: WORLD_SIZE
+              value: "4" # Total number of workers (including master)
+            - name: MASTER_ADDR
+              value: "pytorch-master-service"
+            - name: MASTER_PORT
+              value: "12345"
+          command: ["python", "/app/distributed_training.py"]
+      restartPolicy: Never

@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pytorch-master
+spec:
+  template:
+    spec:
+      containers:
+        - name: pytorch-master
+          image: dockinator24/distributed-pytorch-trainer:latest
+          resources:
+            limits:
+              nvidia.com/gpu: 1 # Request 1 GPU
+          env:
+            - name: RANK
+              value: "0" # Master is always rank 0
+            - name: WORLD_SIZE
+              value: "4" # Total number of workers (including master)
+            - name: MASTER_ADDR
+              value: "0.0.0.0" # Master binds to itself
+            - name: MASTER_PORT
+              value: "12345"
+          command: ["python", "/app/distributed_training.py"]
+          ports:
+            - containerPort: 12345
+      restartPolicy: Never

@@ -1,0 +1,25 @@
+# Use the lightweight CUDA base image
+FROM nvidia/cuda:12.6.2-cudnn-devel-ubi9
+
+# Set the working directory
+WORKDIR /app
+
+# Install essential system dependencies
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    python3-dev \
+    libomp-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PyTorch and torchvision
+RUN pip3 install --no-cache-dir torch torchvision
+
+# Copy your distributed training script into the container
+COPY distributed_training.py /app/distributed_training.py
+
+# Set environment variables for NCCL and CUDA
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+
+# Set the default command to run your script
+CMD ["python3", "/app/distributed_training.py"]
