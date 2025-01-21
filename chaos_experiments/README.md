@@ -53,7 +53,7 @@ helm install acme \
   ./chart-acme
 ```
 
-# Install chaos mesh
+# Install chaos mesh on the Cluster
 helm repo add chaos-mesh https://charts.chaos-mesh.org
 helm repo update
 
@@ -63,3 +63,6 @@ Follow instructions at https://chaos-mesh.org/docs/production-installation-using
 kubectl apply experiments/503.yaml
 
 # Alternative : Introduce chaos through the chaos-mesh ui
+
+# View Smart Scaler UI for metrics
+### See metrics an https://ui.saas1.smart-scaler.io
