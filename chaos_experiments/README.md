@@ -10,9 +10,7 @@ This guide provides step-by-step instructions to deploy the Acme Fitness applica
 4. [Install Chaos Mesh on the Cluster](#install-chaos-mesh-on-the-cluster)
 5. [Introduce Chaos with HTTPChaos Configuration](#introduce-chaos-with-httpchaos-configuration)
 6. [View Smart Scaler UI for metrics](#view-smart-scaler-ui-metrics)
-7. [Additional Resources](#additional-resources)
-8. [Troubleshooting](#troubleshooting)
-9. [Contact](#contact)
+
 
 ---
 
@@ -62,7 +60,7 @@ Follow instructions at https://chaos-mesh.org/docs/production-installation-using
 # introduce-chaos-with-httpchaos-configuration
 kubectl apply experiments/503.yaml
 
-# Alternative : Introduce chaos through the chaos-mesh ui
+### Alternative : Introduce chaos through the chaos-mesh ui
 
 # View Smart Scaler UI for metrics
 ### See metrics an https://ui.saas1.smart-scaler.io
