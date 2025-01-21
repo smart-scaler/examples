@@ -63,4 +63,4 @@ kubectl apply experiments/503.yaml
 ### Alternative : Introduce chaos through the chaos-mesh ui
 
 # View Smart Scaler UI for metrics
-### See metrics an https://ui.saas1.smart-scaler.io
+### See metrics on https://ui.saas1.smart-scaler.io
