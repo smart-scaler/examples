@@ -57,17 +57,7 @@ helm install acme \
 helm repo add chaos-mesh https://charts.chaos-mesh.org
 helm repo update
 
-
-# Check container runtime
-run "kubectl get nodes -o wide" in the CONTAINER-RUNTIME column
-
-# Select the appropriate command to install chaos-mesh depending on the container-runtime
-
-# Default to /var/run/docker.sock
-helm install chaos-mesh chaos-mesh/chaos-mesh -n=chaos-mesh --version 2.7.0
-
-# /run/containerd/containerd.sock
-helm install chaos-mesh chaos-mesh/chaos-mesh -n=chaos-mesh --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock --version 2.7.0
+Follow instructions at https://chaos-mesh.org/docs/production-installation-using-helm/
 
 # introduce-chaos-with-httpchaos-configuration
 kubectl apply experiments/503.yaml
