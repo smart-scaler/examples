@@ -5,8 +5,8 @@ This guide provides step-by-step instructions to deploy the Acme Fitness applica
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
-2. [Install Acme Fitness on the Cluster](#install-acme-fitness-on-the-cluster)
-3. [Sign up for smart-scaler account](#install--smart-scaler-agent)
+2. [Sign up for smart-scaler account](#install--smart-scaler-agent)
+3. [Install Acme Fitness on the Cluster](#install-acme-fitness-on-the-cluster)
 4. [Install Chaos Mesh on the Cluster](#install-chaos-mesh-on-the-cluster)
 5. [Introduce Chaos with HTTPChaos Configuration](#introduce-chaos-with-httpchaos-configuration)
 6. [View Smart Scaler UI for metrics](#view-smart-scaler-ui-metrics)
