@@ -1,0 +1,3 @@
+flask
+transformers
+torch  # Required for many Hugging Face models
