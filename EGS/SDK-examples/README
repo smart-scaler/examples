@@ -8,23 +8,31 @@ Admin Persona
 		Register and onboard new cluster
 
 	Day 1 - Monitoring and Observability
+        Log into EGS UI for Best of Class Observability, Monitoring and Management of GPU Resources
 
 
-	Day 1 - User/Team asks for GPU resources
+	Day 1 - Handle User/Team asks for GPU workspaces
 		Log in to UI
 		Create and Retrieve the admin API token
 		Use the token to 
-			Provision WorkSpaces for he user
+			Provision WorkSpaces for the user
 			Sets up the right RBAC to enable deployment
 			returns kubeconfig namespace [same as workspace name] and token/url to log into EGS
 
+	Day 1 - Manage Production Inference/Agentic workloads
+		Log in to UI
+        Manage Production Inference/Agentic endpoints
+	
 
 Developer/Engineer/Scientist Persona
+    Day 0 -> Request access to GPU Workspace from Admin. Will recieve kubeconfig to the worksapce, url/token to log into the EGS UI
+
+    Day 1 --> 
 	Login to UI with token
 	Create and Retrieve the dev API token
 	use Kubectl to connect to the workspace
 	Deploy their GPU workload 
-	use the dev API token to request GPR for the workspace
+	Use the dev API token to request GPR for the workspace
 		Query the inventory to select the right node type
 		Assign the right priority
 		Assing the lenght of time for GPU to be avaialble
