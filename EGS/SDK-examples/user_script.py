@@ -11,7 +11,7 @@ def ask_to_continue(step):
         exit()
 
 
-# Step 2: Authenticate with EGS
+# Step 1: Authenticate with EGS using the user's API key
 def authenticate(ENDPOINT, API_KEY):
     # ask_to_continue("Authenticate with EGS")
     print("Authenticating with EGS...")
@@ -19,18 +19,7 @@ def authenticate(ENDPOINT, API_KEY):
     print("Authentication successful.")
     return auth
 
-
-
-# Step 4: Create workspace and associate it with the namespace
-def create_workspace(auth, workspace_name, namespace):
-    # ask_to_continue("Create workspace")
-    print(f"Creating workspace '{workspace_name}' and associating it with namespace '{namespace}'...")
-    workspace = egs.create_workspace(workspace_name, clusters=CLUSTER_NAME, namespaces=namespace, username=USER_NAME, email=USER_EMAIL, authenticated_session=auth)
-    print(f"Workspace '{workspace_name}' created successfully.")
-    return workspace
-
-
-# Step 5: Create manual GPR requests for slices
+# Step 2: Create manual GPR requests for slices
 def create_gpr_requests(auth, workspace_name, slices, CLUSTER_NAME):
     # ask_to_continue("Create GPR requests")
     for request_name, priority in slices.items():
@@ -90,37 +79,26 @@ def main():
         # Extract values for the current team
         ENDPOINT = config["ENDPOINT"]
         WORKSPACE_NAME = config["WORKSPACE_NAME"]
-        # API_KEY = config["API_KEY"]
-        # WORKSPACE_NAMESPACE = config["WORKSPACE_NAMESPACE"]
         CLUSTER_NAME = config["CLUSTER_NAME"]
-        # SECRET_NAME = config["SECRET_NAME"]
-        # USER_NAME = config["USER_NAME"]
-        # USER_EMAIL = config["USER_EMAIL"]
-        # PROJECT_NAMESPACE = config["PROJECT_NAMESPACE"]
-        # KUBECONFIG_FILE = config["KUBECONFIG_FILE"]
 
-        # read user api key from f"./{team}/api-token.txt"
+        # Read user api key from user folder
         with open(f"./{team}/api-token.txt", "r") as file:
             USER_API_KEY = file.read().strip()
 
         # Placeholder for any further processing per team
-        print(f"Completed processing for team: {team}\n{'='*50}")
+        print(f"Completed processing API-Token for team: {team}\n{'='*50}")
 
-        print("Starting GPU workload automation script...")
-
-        # log into the ui using the token and create an api-key
-        
         user_auth = authenticate(ENDPOINT=ENDPOINT, API_KEY=USER_API_KEY)
 
         # Define slices and their GPU shapes
         slices = {
-            "test_low": 1,
-            "test_medium": 101,
-            "test_high": 201
+            "low priority": 1,
+            "important fine tuning": 101,
+            "EMERGENCY": 201
         }
 
-        # use kubectl to connect to workspace, deploy the gpu workload.
-        # kubectl apply -f llm-deployment.yaml using ./{team}/llm-deployment.yaml
+        print("Installing GPU workloads...")
+
         subprocess.run(["kubectl", "--kubeconfig", f"./{team}/{team}-kubeconfig.yaml", "apply", "-f", f"./llm-deployment.yaml"], check=True)
 
         subprocess.run(["kubectl", "--kubeconfig", f"./{team}/{team}-kubeconfig.yaml", "apply", "-f", f"./service.yaml"], check=True)
@@ -147,7 +125,7 @@ def main():
         #         print(f"Error: {e}")
         #     time.sleep(1)
 
-
+        print("Creating GPR requests...")
         # Create GPR requests for each slice
         create_gpr_requests(user_auth, WORKSPACE_NAME, slices, CLUSTER_NAME)
         

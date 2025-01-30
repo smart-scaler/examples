@@ -34,12 +34,14 @@ with open("config.json", "w") as file:
 
 print("Config file 'config.json' has been generated successfully.")
 
-# Run admin_script.py with the generated config file
+# # Uncomment the following lines to create the workspaces
+# # Run admin_script.py with the generated config file
 # subprocess.run(["python", "admin_script.py", "config.json", "create"], check=True)
 # # sleep for 60 seconds
 # print("Waiting for 120 seconds ...")
 # time.sleep(120)
 
+# # Uncomment the following line to delete the workspaces
 # subprocess.run(["python", "admin_script.py", "config.json", "delete"], check=True)
 
 subprocess.run(["python", "user_script.py", "config.json"], check=True)

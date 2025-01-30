@@ -12,7 +12,7 @@ def ask_to_continue(step):
 
 import json
 
-# Step 2: Authenticate with EGS
+# Step 1: Authenticate with EGS
 def authenticate(ENDPOINT, API_KEY):
     # ask_to_continue("Authenticate with EGS")
     print("Authenticating with EGS...")
@@ -21,7 +21,7 @@ def authenticate(ENDPOINT, API_KEY):
     return auth
 
 
-# Step 4: Create workspace and associate it with the namespace
+# Step 2: Create workspace and associate it with the namespace
 def create_workspace(auth, workspace_name, namespace, CLUSTER_NAME, USER_NAME, USER_EMAIL):
     # ask_to_continue("Create workspace ")
     print(f"Creating workspace '{workspace_name}' and associating it with namespace '{namespace}'...")
@@ -36,30 +36,6 @@ def Delete_workspace(auth, workspace_name):
     workspace = egs.delete_workspace(workspace_name, authenticated_session=auth)
     print(f"Workspace '{workspace_name}' deleted successfully.")
     return workspace
-
-# Step 5: Create manual GPR requests for slices
-def create_gpr_requests(auth, workspace_name, slices):
-    # ask_to_continue("Create GPR requests")
-    for request_name, priority in slices.items():
-        for i in range(1):
-            print(f"Creating GPR request {request_name}_{i+1} for request '{request_name}' with priority '{priority}'...")
-
-            inventory = egs.inventory(authenticated_session=auth).__str__()
-            # convert string to json
-            inventory = json.loads(inventory)
-            print(f"Inventory retrieved successfully.")
-            
-            print(inventory["managed_nodes"][0]["memory"], inventory["managed_nodes"][0]["instance_type"], inventory["managed_nodes"][0]["gpu_shape"])
-            # print all the inventory items that are used in the GPR request
-            print(inventory["managed_nodes"][0]["memory"], inventory["managed_nodes"][0]["instance_type"], inventory["managed_nodes"][0]["gpu_shape"])
-
-            request_name = f"{request_name}_{i+1}"
-            gpu_request_id = egs.request_gpu(request_name=request_name, workspace_name=workspace_name, cluster_name=CLUSTER_NAME[0], node_count=1, gpu_per_node_count=1, memory_per_gpu=int(inventory["managed_nodes"][0]["memory"]), instance_type=inventory["managed_nodes"][0]["instance_type"], gpu_shape=inventory["managed_nodes"][0]["gpu_shape"], exit_duration="0d0h3m", priority=priority, authenticated_session=auth)
-
-            print(f"GPR request {request_name}_{i+1} created successfully with GPU request ID '{gpu_request_id}'.")
-
-            print(f"Waiting for 10 seconds before creating the next GPR request...")
-            time.sleep(10)  # To avoid overwhelming the API
 
 def main(): 
     # take the config.json file as an argument
@@ -95,8 +71,6 @@ def main():
         SECRET_NAME = config["SECRET_NAME"]
         USER_NAME = config["USER_NAME"]
         USER_EMAIL = config["USER_EMAIL"]
-        # USER_ROLE = config["USER_ROLE"]
-        # USER_API_KEY = config["USER_API_KEY"]
         PROJECT_NAMESPACE = config["PROJECT_NAMESPACE"]
         KUBECONFIG_FILE = config["KUBECONFIG_FILE"]
 
@@ -120,18 +94,15 @@ def main():
             print("Kubeconfig retrieved successfully.")
             
             # saving kubeconfig to a file
-            # create a folder for the team
-            # check if the folder exists, before creating it
             subprocess.run(["mkdir", "-p", f"./{team}"], check=True)
             with open(f"./{team}/{WORKSPACE_NAME}-kubeconfig.yaml", "w") as f:
                 f.write(kubeconfig)
 
-            # get the secrets for the workspace in the project namesapce
-            # get the json output of the secrets and find the token
             secret = subprocess.run(["kubectl", "--kubeconfig", KUBECONFIG_FILE, "get", "secrets", SECRET_NAME, "-n", PROJECT_NAMESPACE, "-o", "json"], capture_output=True, text=True, check=True)
             secret_json = json.loads(secret.stdout)
             token = secret_json['data']['token']
             token = base64.b64decode(token).decode('utf-8')
+            
             # save the token to a file
             with open(f"./{team}/{WORKSPACE_NAME}-token.txt", "w") as f:
                 f.write(token)

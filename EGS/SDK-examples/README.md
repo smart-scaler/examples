@@ -60,4 +60,10 @@ In this directory, you will find sample code that uses the EGS SDK to demonstrat
    - To get the `EGS_ENDPOINT`, run `kubectl get svc -n kubeslice-controller` and copy the `EXTERNAL-IP` of the `egs-core-apis` service and append `:8080` to it. Example: `http://<EXTERNAL-IP>:8080`
    - `EGP_API_KEY` can be obtained from the EGS UI
 
-2. Run `python3 runner.py` to generate sample workspaces and GPU requests
+2. Place the admin kubeconfig file in the root directory of the project, and name it `admin-kubeconfig.yaml`
+
+3. In the runner.py file, update the CLUSTER_NAME variable with the name of the cluster in your EGS account
+
+4. Based on the requirement uncomment the code that calls admin_script or user_script in the runner.py file
+
+5. Run `python3 runner.py` to generate sample workspaces and GPU requests
