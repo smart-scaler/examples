@@ -12,17 +12,18 @@ spec:
       labels:
         app: llm
     spec:
+      imagePullSecrets:
+        - name: my-registry-secret
       containers:
         - name: llm-container
-          image: dockinator24/my-llm:latest
+          image: 129.80.55.216:5000/my-llm:latest
           ports:
             - containerPort: 5000
           resources:
             requests:
               memory: "4Gi"
               cpu: "2"
-              nvidia.com/gpu: "1"
             limits:
               memory: "8Gi"
               cpu: "4"
-              nvidia.com/gpu: "1"
+              nvidia.com/gpu: 1
