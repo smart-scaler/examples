@@ -1,0 +1,38 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: comfyui-kserve
+  namespace: raj
+  annotations:
+    serving.kserve.io/enable-prometheus-scraping: "true"
+spec:
+  predictor:
+    containers:
+      - name: kserve-container
+        image: jayanthavesha/comfyui-kserve:1.0
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8188
+        env:
+          - name: NVIDIA_VISIBLE_DEVICES
+            value: "all"
+        resources:
+          limits:
+            nvidia.com/gpu: 1 # Remove if not using GPU
+            memory: 24Gi
+            cpu: "6"
+          requests:
+            memory: 16Gi
+            cpu: "4"
+        volumeMounts:
+          - name: models-volume
+            mountPath: /app/models
+          - name: output-volume
+            mountPath: /app/output
+    volumes:
+      - name: models-volume
+        persistentVolumeClaim:
+          claimName: comfyui-models-pvc
+      - name: output-volume
+        persistentVolumeClaim:
+          claimName: comfyui-output-pvc
